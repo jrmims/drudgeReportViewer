@@ -38,7 +38,10 @@
         android:id="@+id/fab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
+        android:layout_gravity="top|end"
         android:layout_margin="@dimen/fab_margin"
-        app:srcCompat="@android:drawable/ic_dialog_email" />
+        app:backgroundTint="#009688"
+        app:fabSize="normal"
+        app:srcCompat="@drawable/ic_refresh_black_24dp" />
+
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
