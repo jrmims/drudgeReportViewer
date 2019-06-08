@@ -1,4 +1,4 @@
-package com.example.drudgereportviewer.ui.main;
+package dev.mims.drudgereportviewer.ui.main;
 
 import androidx.arch.core.util.Function;
 import androidx.lifecycle.LiveData;

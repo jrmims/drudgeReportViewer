@@ -1,4 +1,4 @@
-package com.example.drudgereportviewer.ui.main;
+package dev.mims.drudgereportviewer.ui.main;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -12,7 +12,7 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 
-import com.example.drudgereportviewer.R;
+import dev.mims.drudgereportviewer.R;
 
 /**
  * A placeholder fragment containing a simple view.

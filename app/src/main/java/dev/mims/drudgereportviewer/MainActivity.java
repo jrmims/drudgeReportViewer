@@ -1,4 +1,4 @@
-package com.example.drudgereportviewer;
+package dev.mims.drudgereportviewer;
 
 import android.os.Bundle;
 
@@ -13,7 +13,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
-import com.example.drudgereportviewer.ui.main.SectionsPagerAdapter;
+import dev.mims.drudgereportviewer.ui.main.SectionsPagerAdapter;
 
 public class MainActivity extends AppCompatActivity {
 

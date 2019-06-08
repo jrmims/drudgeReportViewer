@@ -1,4 +1,4 @@
-package com.example.drudgereportviewer;
+package dev.mims.drudgereportviewer;
 
 import org.junit.Test;
 

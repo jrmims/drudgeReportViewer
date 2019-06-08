@@ -1,4 +1,4 @@
-package com.example.drudgereportviewer.ui.main;
+package dev.mims.drudgereportviewer.ui.main;
 
 import android.content.Context;
 
@@ -8,7 +8,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
 
-import com.example.drudgereportviewer.R;
+import dev.mims.drudgereportviewer.R;
 
 /**
  * A [FragmentPagerAdapter] that returns a fragment corresponding to

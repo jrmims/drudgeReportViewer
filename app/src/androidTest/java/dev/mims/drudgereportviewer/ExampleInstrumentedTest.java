@@ -1,4 +1,4 @@
-package com.example.drudgereportviewer;
+package dev.mims.drudgereportviewer;
 
 import android.content.Context;
 
@@ -22,6 +22,6 @@ public class ExampleInstrumentedTest {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getTargetContext();
 
-        assertEquals("com.example.drudgereportviewer", appContext.getPackageName());
+        assertEquals("dev.mims.drudgereportviewer", appContext.getPackageName());
     }
 }
