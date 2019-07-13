@@ -91,7 +91,7 @@ public class GrabHTMLTask extends AsyncTask<URL, Integer, Map<String, List<Map<S
         Map<String, List<Map<String,String>>> columnLinksMap = new HashMap<String,List<Map<String,String>>>();
         columnLinksMap.put("top", topLinkList);
         columnLinksMap.put("left", leftLinkList);
-        columnLinksMap.put("middle", middleLinkList);
+        columnLinksMap.put("center", middleLinkList);
         columnLinksMap.put("right", rightLinkList);
 
         return columnLinksMap;

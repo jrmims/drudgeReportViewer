@@ -1,27 +1,48 @@
 package dev.mims.drudgereportviewer.ui.main;
 
 import android.os.Bundle;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.Spanned;
+import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.content.Context;
 
-import androidx.annotation.Nullable;
 import androidx.annotation.NonNull;
+import androidx.browser.customtabs.CustomTabsIntent;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 
+import java.util.List;
+import java.util.Map;
+
+import dev.mims.drudgereportviewer.CustomOnClickListener;
 import dev.mims.drudgereportviewer.R;
+import dev.mims.drudgereportviewer.CustomTabsURLSpan;
 
 /**
- * A placeholder fragment containing a simple view.
+ * Creates the same base fragment for each tab. Populates UI based on tab index; "right" tab grabs
+ * data for the correct tab.
  */
 public class PlaceholderFragment extends Fragment {
 
     private static final String ARG_SECTION_NUMBER = "section_number";
 
     private PageViewModel pageViewModel;
+    private CustomTabsIntent.Builder builder;
+    private CustomTabsIntent customTabsIntent;
+    private CustomOnClickListener onClickListener;
+
+    public PlaceholderFragment() {
+        builder = new CustomTabsIntent.Builder();
+        customTabsIntent = builder.build();
+        onClickListener = new CustomOnClickListener();
+    }
 
     public static PlaceholderFragment newInstance(int index) {
         PlaceholderFragment fragment = new PlaceholderFragment();
@@ -34,12 +55,18 @@ public class PlaceholderFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        pageViewModel = ViewModelProviders.of(this).get(PageViewModel.class);
-        int index = 1;
-        if (getArguments() != null) {
-            index = getArguments().getInt(ARG_SECTION_NUMBER);
-        }
-        pageViewModel.setIndex(index);
+        // store PageViewModel
+        pageViewModel = ViewModelProviders.of(getActivity()).get(PageViewModel.class);
+    }
+
+    private Spannable createURLSpan(String text, String url) {
+        // TODO Check Spannable for changing link colors after click?
+        // TODO Fix blank space issue: https://stackoverflow.com/questions/9274331/clickablespan-strange-behavioronclick-called-when-clicking-empty-space
+        Spannable span = new SpannableString(text);
+        CustomTabsURLSpan customURLSpan = new CustomTabsURLSpan(url);
+        customURLSpan.setOnClickListener(onClickListener);
+        span.setSpan(customURLSpan,0, text.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        return span;
     }
 
     @Override
@@ -47,13 +74,51 @@ public class PlaceholderFragment extends Fragment {
             @NonNull LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_main, container, false);
-        final TextView textView = root.findViewById(R.id.section_label);
-        pageViewModel.getText().observe(this, new Observer<String>() {
+        final LinearLayout linearLayout = root.findViewById(R.id.linearLayout);
+
+        pageViewModel.getLinks().observe(this,new Observer<Map<String, List<Map<String, String>>>>() {
             @Override
-            public void onChanged(@Nullable String s) {
-                textView.setText(s);
+            public void onChanged(Map<String,List<Map<String,String>>> linkMap)
+            {
+                // If mlinkMap from pageViewModel changes, update the UI
+                Context context = getContext();
+                linearLayout.removeAllViews(); // clear out linearLayout
+
+                int currIndex = 0;
+                // grab tab index from Bundle
+                if (getArguments() != null) {
+                    currIndex = getArguments().getInt(ARG_SECTION_NUMBER);
+                }
+                String tab = null;
+                switch (currIndex) {
+                    case 0:
+                        tab = "top";
+                        break;
+                    case 1:
+                        tab = "left";
+                        break;
+                    case 2:
+                        tab = "center";
+                        break;
+                    case 3:
+                        tab = "right";
+                        break;
+                }
+                List<Map<String,String>> tempList = linkMap.get(tab);
+                for( Map<String,String> tempMap : tempList )
+                {
+                    TextView tempTV = new TextView(context);
+                    String spanStr = tempMap.get("title");
+                    String tempURL = tempMap.get("url");
+                    Spannable span = createURLSpan(spanStr, tempURL);
+                    tempTV.append(span);
+                    tempTV.setMovementMethod(LinkMovementMethod.getInstance());
+                    linearLayout.addView(tempTV);
+                }
             }
         });
+
         return root;
     }
+
 }
