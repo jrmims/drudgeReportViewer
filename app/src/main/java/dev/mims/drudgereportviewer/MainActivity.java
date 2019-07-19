@@ -39,12 +39,12 @@ public class MainActivity extends AppCompatActivity {
         URL[] urlArray = new URL[1];
         URL drudgeURL;
         // initialize resultLinkMap
-        Map<String, List<Map<String,String>>> resultLinkMap = new HashMap<>();
+        Map<String, List<Map<String,Object>>> resultLinkMap = new HashMap<>();
 
         // TODO make WeakReference
         GrabHTMLTask linksGrabber = new GrabHTMLTask(resultLinkMap, new GrabHTMLTask.AsyncResponse() {
             @Override
-            public void processFinish(Map<String, List<Map<String,String>>> resultMap) {
+            public void processFinish(Map<String, List<Map<String,Object>>> resultMap) {
                 // Receives list/map of urls from GrabHTMLTask, pushes to PageViewModel for storage
                 pageViewModel.storeLinks(resultMap);
             }

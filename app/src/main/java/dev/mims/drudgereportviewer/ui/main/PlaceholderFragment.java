@@ -1,5 +1,6 @@
 package dev.mims.drudgereportviewer.ui.main;
 
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.text.Spannable;
 import android.text.SpannableString;
@@ -8,6 +9,7 @@ import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.content.Context;
@@ -47,6 +49,7 @@ public class PlaceholderFragment extends Fragment {
     public static PlaceholderFragment newInstance(int index) {
         PlaceholderFragment fragment = new PlaceholderFragment();
         Bundle bundle = new Bundle();
+        // stores index with this instance of PlaceholderFragment
         bundle.putInt(ARG_SECTION_NUMBER, index);
         fragment.setArguments(bundle);
         return fragment;
@@ -76,9 +79,9 @@ public class PlaceholderFragment extends Fragment {
         View root = inflater.inflate(R.layout.fragment_main, container, false);
         final LinearLayout linearLayout = root.findViewById(R.id.linearLayout);
 
-        pageViewModel.getLinks().observe(this,new Observer<Map<String, List<Map<String, String>>>>() {
+        pageViewModel.getLinks().observe(this,new Observer<Map<String, List<Map<String, Object>>>>() {
             @Override
-            public void onChanged(Map<String,List<Map<String,String>>> linkMap)
+            public void onChanged(Map<String,List<Map<String,Object>>> linkMap)
             {
                 // If mlinkMap from pageViewModel changes, update the UI
                 Context context = getContext();
@@ -104,16 +107,32 @@ public class PlaceholderFragment extends Fragment {
                         tab = "right";
                         break;
                 }
-                List<Map<String,String>> tempList = linkMap.get(tab);
-                for( Map<String,String> tempMap : tempList )
+                List<Map<String,Object>> tempList = linkMap.get(tab);
+                for( Map<String,Object> tempMap : tempList )
                 {
-                    TextView tempTV = new TextView(context);
-                    String spanStr = tempMap.get("title");
-                    String tempURL = tempMap.get("url");
-                    Spannable span = createURLSpan(spanStr, tempURL);
-                    tempTV.append(span);
-                    tempTV.setMovementMethod(LinkMovementMethod.getInstance());
-                    linearLayout.addView(tempTV);
+                    String tempTitle = (String)tempMap.get("title");
+                    String tempURL = (String)tempMap.get("url");
+                    if ( tempTitle.length() == 0 || tempURL.length() == 0 )
+                    {
+                        // We have an image
+                        Object tempBitmap = tempMap.get("img");
+                        if(tempBitmap != null)
+                        {
+                            ImageView tempIV = new ImageView(context);
+                            tempIV.setImageBitmap( (Bitmap)tempBitmap );
+                            linearLayout.addView(tempIV);
+                        }
+
+                    } else
+                    {
+                        // We have a Link
+                        TextView tempTV = new TextView(context);
+                        Spannable span = createURLSpan(tempTitle, tempURL);
+                        tempTV.append(span);
+                        tempTV.setMovementMethod(LinkMovementMethod.getInstance());
+                        linearLayout.addView(tempTV);
+                    }
+
                 }
             }
         });

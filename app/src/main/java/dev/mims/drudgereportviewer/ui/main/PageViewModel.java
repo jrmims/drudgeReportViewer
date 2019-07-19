@@ -9,12 +9,12 @@ import java.util.Map;
 
 public class PageViewModel extends ViewModel {
     // Store List of Maps. Keys: title, url, img
-    private MutableLiveData<Map<String, List<Map<String,String>>>> mLinkMap = new MutableLiveData<>();
+    private MutableLiveData<Map<String, List<Map<String,Object>>>> mLinkMap = new MutableLiveData<>();
 
-    public void storeLinks(Map<String, List<Map<String,String>>> linkMap){
+    public void storeLinks(Map<String, List<Map<String,Object>>> linkMap){
         mLinkMap.setValue(linkMap);
     }
 
-    public LiveData<Map<String,List<Map<String,String>>>> getLinks() {return mLinkMap;}
+    public LiveData<Map<String,List<Map<String,Object>>>> getLinks() {return mLinkMap;}
 
 }
