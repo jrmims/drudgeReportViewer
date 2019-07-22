@@ -36,23 +36,20 @@ public class MainActivity extends AppCompatActivity {
         TabLayout tabs = findViewById(R.id.tabs);
         tabs.setupWithViewPager(viewPager);
         FloatingActionButton fab = findViewById(R.id.fab);
-        URL[] urlArray = new URL[1];
-        URL drudgeURL;
         // initialize resultLinkMap
-        Map<String, List<Map<String,Object>>> resultLinkMap = new HashMap<>();
+        final Map<String, List<Map<String,Object>>> resultLinkMap = new HashMap<>();
 
-        // TODO make WeakReference
-        GrabHTMLTask linksGrabber = new GrabHTMLTask(resultLinkMap, new GrabHTMLTask.AsyncResponse() {
-            @Override
-            public void processFinish(Map<String, List<Map<String,Object>>> resultMap) {
-                // Receives list/map of urls from GrabHTMLTask, pushes to PageViewModel for storage
-                pageViewModel.storeLinks(resultMap);
-            }
-        });
         try {
             // Set GrabHTMLTask to run
-            drudgeURL = new URL("http://www.drudgereport.com");
-            urlArray[0] = drudgeURL;
+            URL drudgeURL = new URL("http://www.drudgereport.com");
+            // TODO make WeakReference
+            GrabHTMLTask linksGrabber = new GrabHTMLTask(resultLinkMap, new GrabHTMLTask.AsyncResponse() {
+                @Override
+                public void processFinish(Map<String, List<Map<String,Object>>> resultMap) {
+                    // Receives list/map of urls from GrabHTMLTask, pushes to PageViewModel for storage
+                    pageViewModel.storeLinks(resultMap);
+                }
+            });
             linksGrabber.execute(drudgeURL);
         }
         catch(MalformedURLException e)
@@ -64,8 +61,23 @@ public class MainActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Refreshing", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+                Snackbar.make(view, "Refreshing", Snackbar.LENGTH_LONG).show();
+                try {
+                    URL drudgeURL = new URL("http://www.drudgereport.com");
+                    // TODO make WeakReference
+                    GrabHTMLTask linksGrabber = new GrabHTMLTask(resultLinkMap, new GrabHTMLTask.AsyncResponse() {
+                        @Override
+                        public void processFinish(Map<String, List<Map<String,Object>>> resultMap) {
+                            // Receives list/map of urls from GrabHTMLTask, pushes to PageViewModel for storage
+                            pageViewModel.storeLinks(resultMap);
+                        }
+                    });
+                    linksGrabber.execute(drudgeURL);
+                }
+                catch (MalformedURLException e)
+                {
+
+                }
             }
         });
     }
