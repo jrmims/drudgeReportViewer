@@ -68,7 +68,11 @@ public class GrabHTMLTask extends AsyncTask<URL, Integer, Map<String, List<Map<S
             int stopPos = htmlStr.toLowerCase().indexOf("<td");
             String tempStr = htmlStr.substring(0,stopPos);
             Document tempDoc = Jsoup.parse(tempStr);
-            Elements tempLinks = tempDoc.select("a");
+            Elements tempLinks = tempDoc.select("a, img");
+            // TODO: probably could make this smarter
+            // removes the Drudge Report Img from list, and the link for that image.
+            tempLinks.remove(tempLinks.size()-1);
+            tempLinks.remove(tempLinks.size()-1);
             topLinkList = extractInfoFromLinks(tempLinks);
             /*
             To grab left column links, we need to grab the first td table cell. Then we convert to
