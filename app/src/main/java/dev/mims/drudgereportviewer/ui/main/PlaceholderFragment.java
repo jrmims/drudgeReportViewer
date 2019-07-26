@@ -1,6 +1,7 @@
 package dev.mims.drudgereportviewer.ui.main;
 
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.text.Spannable;
 import android.text.SpannableString;
@@ -126,10 +127,12 @@ public class PlaceholderFragment extends Fragment {
                     } else
                     {
                         // We have a Link
+                        String tempColor = (String)tempMap.get("color");
                         TextView tempTV = new TextView(context);
                         Spannable span = createURLSpan(tempTitle, tempURL);
                         tempTV.append(span);
                         tempTV.setMovementMethod(LinkMovementMethod.getInstance());
+                        tempTV.setLinkTextColor(Color.parseColor(tempColor));
                         linearLayout.addView(tempTV);
                     }
 

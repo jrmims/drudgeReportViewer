@@ -117,13 +117,21 @@ public class GrabHTMLTask extends AsyncTask<URL, Integer, Map<String, List<Map<S
             Map<String,Object> tempLinkMap = new HashMap<String, Object>();
             if( tempLink.tagName().toLowerCase() == "a" ) {
                 // A Link
+                // TODO make this a class instead of having to maintain these map keys
                 tempLinkMap.put("title", tempLink.text());
                 tempLinkMap.put("url", tempLink.attr("href"));
+                String tempColor = extractFontColor(tempLink);
+                if(tempColor == "")
+                {
+                    tempColor = "black"; // default
+                }
+                tempLinkMap.put("color", tempColor);
                 tempLinkMap.put("img", null);
             } else if( tempLink.tagName().toLowerCase() == "img" ) {
                 // An Image
                 tempLinkMap.put("title", "");
                 tempLinkMap.put("url", "");
+                tempLinkMap.put("color", "");
                 String imgURL = tempLink.attr("src");
                 try {
                     Bitmap bitmap = BitmapFactory.decodeStream((InputStream) new URL(imgURL).getContent());
@@ -136,6 +144,19 @@ public class GrabHTMLTask extends AsyncTask<URL, Integer, Map<String, List<Map<S
             tempLinkList.add(tempLinkMap);
         }
         return tempLinkList;
+    }
+
+    String extractFontColor(Element link)
+    {
+        String color = "";
+        Elements fontElList = link.getElementsByTag("font");
+        if(fontElList.size() > 0)
+        {
+            // grab first one and use for color
+            Element fontElement = fontElList.get(0);
+            color = fontElement.attr("color");
+        }
+        return color;
     }
 
     private List<Map<String,Object>> extractLinksFromTD(Element tableCell)
