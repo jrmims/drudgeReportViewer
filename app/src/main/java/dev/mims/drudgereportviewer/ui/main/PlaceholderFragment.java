@@ -134,7 +134,7 @@ public class PlaceholderFragment extends Fragment {
                         tempTV.append(span);
                         tempTV.setMovementMethod(LinkMovementMethod.getInstance());
                         tempTV.setLinkTextColor(Color.parseColor(tempColor));
-                        tempTV.setTextSize(TypedValue.COMPLEX_UNIT_PX, getResources().getDimension(R.dimen.text_size_medium));
+                        tempTV.setTextSize(TypedValue.COMPLEX_UNIT_PX, getResources().getDimension((int)tempMap.get("size")));
                         linearLayout.addView(tempTV);
                     }
 

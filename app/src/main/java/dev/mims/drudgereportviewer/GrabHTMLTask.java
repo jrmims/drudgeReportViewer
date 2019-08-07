@@ -74,6 +74,8 @@ public class GrabHTMLTask extends AsyncTask<URL, Integer, Map<String, List<Map<S
             tempLinks.remove(tempLinks.size()-1);
             tempLinks.remove(tempLinks.size()-1);
             topLinkList = extractInfoFromLinks(tempLinks);
+            // Make Headline have larger text
+            topLinkList.get(topLinkList.size()-1).put("size", R.dimen.text_size_large);
             /*
             To grab left column links, we need to grab the first td table cell. Then we convert to
             string, and find the <! which currently marks the start of the source links which we
@@ -127,11 +129,13 @@ public class GrabHTMLTask extends AsyncTask<URL, Integer, Map<String, List<Map<S
                 }
                 tempLinkMap.put("color", tempColor);
                 tempLinkMap.put("img", null);
+                tempLinkMap.put("size", R.dimen.text_size_medium);
             } else if( tempLink.tagName().toLowerCase() == "img" ) {
                 // An Image
                 tempLinkMap.put("title", "");
                 tempLinkMap.put("url", "");
                 tempLinkMap.put("color", "");
+                tempLinkMap.put("size", "");
                 String imgURL = tempLink.attr("src");
                 try {
                     Bitmap bitmap = BitmapFactory.decodeStream((InputStream) new URL(imgURL).getContent());
