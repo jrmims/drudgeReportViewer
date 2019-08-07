@@ -7,6 +7,7 @@ import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.method.LinkMovementMethod;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -133,6 +134,7 @@ public class PlaceholderFragment extends Fragment {
                         tempTV.append(span);
                         tempTV.setMovementMethod(LinkMovementMethod.getInstance());
                         tempTV.setLinkTextColor(Color.parseColor(tempColor));
+                        tempTV.setTextSize(TypedValue.COMPLEX_UNIT_PX, getResources().getDimension(R.dimen.text_size_medium));
                         linearLayout.addView(tempTV);
                     }
 
