@@ -21,28 +21,28 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-public class GrabHTMLTask extends AsyncTask<URL, Integer, Map<String, List<Map<String,Object>>> > {
-    public GrabHTMLTask(Map<String, List<Map<String,Object>>> resultMap, AsyncResponse asyncResponse)
+public class GrabHTMLTask extends AsyncTask<URL, Integer, Map<String, List<DrudgeItem>> > {
+    public GrabHTMLTask(Map<String, List<DrudgeItem>> resultMap, AsyncResponse asyncResponse)
     {
         this.resultMap = resultMap;
         this.asyncResponseInterface = asyncResponse;
     }
 
     public interface AsyncResponse {
-        void processFinish(Map<String, List<Map<String,Object>>> resultMap);
+        void processFinish(Map<String, List<DrudgeItem>> resultMap);
     }
 
     public AsyncResponse asyncResponseInterface = null;
-    private Map<String, List<Map<String,Object>>> resultMap;
+    private Map<String, List<DrudgeItem>> resultMap;
 
-    protected Map<String, List<Map<String,Object>>> doInBackground(URL... urls) {
+    protected Map<String, List<DrudgeItem>> doInBackground(URL... urls) {
         BufferedReader reader;
         StringBuilder stringBuilder;
 
-        List<Map<String,Object>> topLinkList = new ArrayList<>();
-        List<Map<String,Object>> leftLinkList = new ArrayList<>();
-        List<Map<String,Object>> middleLinkList = new ArrayList<>();
-        List<Map<String,Object>> rightLinkList = new ArrayList<>();
+        List<DrudgeItem> topLinkList = new ArrayList<>();
+        List<DrudgeItem> leftLinkList = new ArrayList<>();
+        List<DrudgeItem> middleLinkList = new ArrayList<>();
+        List<DrudgeItem> rightLinkList = new ArrayList<>();
         try {
             // Setup Connection
             URL url = urls[0];
@@ -75,7 +75,9 @@ public class GrabHTMLTask extends AsyncTask<URL, Integer, Map<String, List<Map<S
             tempLinks.remove(tempLinks.size()-1);
             topLinkList = extractInfoFromLinks(tempLinks);
             // Make Headline have larger text
-            topLinkList.get(topLinkList.size()-1).put("size", R.dimen.text_size_large);
+            DrudgeItem lastDrudgeItem = topLinkList.get(topLinkList.size()-1);
+            lastDrudgeItem.setSize(R.dimen.text_size_large);
+
             /*
             To grab left column links, we need to grab the first td table cell. Then we convert to
             string, and find the <! which currently marks the start of the source links which we
@@ -97,7 +99,7 @@ public class GrabHTMLTask extends AsyncTask<URL, Integer, Map<String, List<Map<S
         {
             Log.e("GrabHTMLTask", e.toString());
         }
-        Map<String, List<Map<String,Object>>> columnLinksMap = new HashMap<String,List<Map<String,Object>>>();
+        Map<String, List<DrudgeItem>> columnLinksMap = new HashMap<String,List<DrudgeItem>>();
         columnLinksMap.put("top", topLinkList);
         columnLinksMap.put("left", leftLinkList);
         columnLinksMap.put("center", middleLinkList);
@@ -106,46 +108,42 @@ public class GrabHTMLTask extends AsyncTask<URL, Integer, Map<String, List<Map<S
         return columnLinksMap;
     }
 
-    protected void onPostExecute(Map<String, List<Map<String,Object>>> result) {
+    protected void onPostExecute(Map<String, List<DrudgeItem>> result) {
         resultMap = result;
         asyncResponseInterface.processFinish(resultMap);
     }
 
-    private List<Map<String,Object>> extractInfoFromLinks(Elements links)
+    private List<DrudgeItem> extractInfoFromLinks(Elements links)
     {
-        List<Map<String,Object>> tempLinkList = new ArrayList<Map<String,Object>>();
+        List<DrudgeItem> tempLinkList = new ArrayList<DrudgeItem>();
         for (Element tempLink : links)
         {
-            Map<String,Object> tempLinkMap = new HashMap<String, Object>();
             if( tempLink.tagName().toLowerCase() == "a" ) {
                 // A Link
-                // TODO make this a class instead of having to maintain these map keys
-                tempLinkMap.put("title", tempLink.text());
-                tempLinkMap.put("url", tempLink.attr("href"));
+                Link linkObj = new Link(tempLink.text(), tempLink.attr("href"));
                 String tempColor = extractFontColor(tempLink);
                 if(tempColor == "")
                 {
                     tempColor = "black"; // default
                 }
-                tempLinkMap.put("color", tempColor);
-                tempLinkMap.put("img", null);
-                tempLinkMap.put("size", R.dimen.text_size_medium);
+                linkObj.setColor(tempColor);
+                tempLinkList.add(linkObj);
             } else if( tempLink.tagName().toLowerCase() == "img" ) {
                 // An Image
-                tempLinkMap.put("title", "");
-                tempLinkMap.put("url", "");
-                tempLinkMap.put("color", "");
-                tempLinkMap.put("size", "");
                 String imgURL = tempLink.attr("src");
                 try {
                     Bitmap bitmap = BitmapFactory.decodeStream((InputStream) new URL(imgURL).getContent());
-                    tempLinkMap.put("img",bitmap);
+                    Image imgObj = new Image(bitmap);
+                    tempLinkList.add(imgObj);
                 } catch (IOException e)
                 {
-                    tempLinkMap.put("img",null);
+
                 }
+            } else if( tempLink.tagName().toLowerCase() == "hr" ) {
+                // a thematic break
+                DrudgeItem lastListObj = tempLinkList.get(tempLinkList.size()-1);
+                lastListObj.setHR();
             }
-            tempLinkList.add(tempLinkMap);
         }
         return tempLinkList;
     }
@@ -163,7 +161,7 @@ public class GrabHTMLTask extends AsyncTask<URL, Integer, Map<String, List<Map<S
         return color;
     }
 
-    private List<Map<String,Object>> extractLinksFromTD(Element tableCell)
+    private List<DrudgeItem> extractLinksFromTD(Element tableCell)
     {
         // in the first <td> section
         String tempStr = tableCell.toString();
@@ -172,8 +170,8 @@ public class GrabHTMLTask extends AsyncTask<URL, Integer, Map<String, List<Map<S
         tempStr = tempStr.substring(0,stopPos);
         // all links found in tempStr should now be real news links
         Document tempDoc = Jsoup.parseBodyFragment(tempStr);
-        Elements columnLinks = tempDoc.select("a, img");
-        List<Map<String,Object>> linkList = extractInfoFromLinks(columnLinks);
+        Elements columnLinks = tempDoc.select("a, img, hr");
+        List<DrudgeItem> linkList = extractInfoFromLinks(columnLinks);
         return linkList;
     }
 }

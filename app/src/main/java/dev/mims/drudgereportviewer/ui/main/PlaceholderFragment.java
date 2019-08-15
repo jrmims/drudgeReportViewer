@@ -1,7 +1,6 @@
 package dev.mims.drudgereportviewer.ui.main;
 
-import android.graphics.Bitmap;
-import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.text.Spannable;
 import android.text.SpannableString;
@@ -26,6 +25,9 @@ import java.util.List;
 import java.util.Map;
 
 import dev.mims.drudgereportviewer.CustomOnClickListener;
+import dev.mims.drudgereportviewer.DrudgeItem;
+import dev.mims.drudgereportviewer.Image;
+import dev.mims.drudgereportviewer.Link;
 import dev.mims.drudgereportviewer.R;
 import dev.mims.drudgereportviewer.CustomTabsURLSpan;
 
@@ -81,9 +83,9 @@ public class PlaceholderFragment extends Fragment {
         View root = inflater.inflate(R.layout.fragment_main, container, false);
         final LinearLayout linearLayout = root.findViewById(R.id.linearLayout);
 
-        pageViewModel.getLinks().observe(this,new Observer<Map<String, List<Map<String, Object>>>>() {
+        pageViewModel.getLinks().observe(this,new Observer<Map<String, List<DrudgeItem>>>() {
             @Override
-            public void onChanged(Map<String,List<Map<String,Object>>> linkMap)
+            public void onChanged(Map<String,List<DrudgeItem>> linkMap)
             {
                 // If mlinkMap from pageViewModel changes, update the UI
                 Context context = getContext();
@@ -109,40 +111,51 @@ public class PlaceholderFragment extends Fragment {
                         tab = "right";
                         break;
                 }
-                List<Map<String,Object>> tempList = linkMap.get(tab);
-                for( Map<String,Object> tempMap : tempList )
-                {
-                    String tempTitle = (String)tempMap.get("title");
-                    String tempURL = (String)tempMap.get("url");
-                    if ( tempTitle.length() == 0 || tempURL.length() == 0 )
+                List<DrudgeItem> tempList = linkMap.get(tab);
+                for( DrudgeItem item : tempList ) {
+                    if (item instanceof Link)
                     {
-                        // We have an image
-                        Object tempBitmap = tempMap.get("img");
-                        if(tempBitmap != null)
-                        {
-                            ImageView tempIV = new ImageView(context);
-                            tempIV.setImageBitmap( (Bitmap)tempBitmap );
-                            linearLayout.addView(tempIV);
-                        }
+                        Link tempLink = (Link)item;
 
-                    } else
-                    {
-                        // We have a Link
-                        String tempColor = (String)tempMap.get("color");
                         TextView tempTV = new TextView(context);
-                        Spannable span = createURLSpan(tempTitle, tempURL);
+                        Spannable span = createURLSpan(tempLink.getTitle(), tempLink.getUrl());
                         tempTV.append(span);
                         tempTV.setMovementMethod(LinkMovementMethod.getInstance());
-                        tempTV.setLinkTextColor(Color.parseColor(tempColor));
-                        tempTV.setTextSize(TypedValue.COMPLEX_UNIT_PX, getResources().getDimension((int)tempMap.get("size")));
+                        tempTV.setLinkTextColor(tempLink.getColor());
+                        tempTV.setTextSize(TypedValue.COMPLEX_UNIT_PX, getResources().getDimension(tempLink.getSize()));
                         linearLayout.addView(tempTV);
-                    }
 
+                        // Add Line to separate links/images
+                        View hrView = new View(context);
+                        hrView.setBackground(createDividerDrawable(item.isHR()));
+                        linearLayout.addView(hrView);
+                    } else if (item instanceof Image) {
+                        Image tempImg = (Image)item;
+                        ImageView tempIV = new ImageView(context);
+                        tempIV.setImageBitmap(tempImg.getImg());
+                        linearLayout.addView(tempIV);
+
+                        // Add Line to separate links/images
+                        View hrView = new View(context);
+                        hrView.setBackground(createDividerDrawable(item.isHR()));
+                        linearLayout.addView(hrView);
+                    }
                 }
             }
         });
 
         return root;
+    }
+
+    private Drawable createDividerDrawable(boolean isHR) {
+        Drawable tempDrawable;
+        if( isHR )
+        {
+            tempDrawable = getResources().getDrawable(R.drawable.vertical_divider_black);
+        } else {
+            tempDrawable = getResources().getDrawable(R.drawable.vertical_divider_gray);
+        }
+        return tempDrawable;
     }
 
 }

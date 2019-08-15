@@ -37,7 +37,7 @@ public class MainActivity extends AppCompatActivity {
         tabs.setupWithViewPager(viewPager);
         FloatingActionButton fab = findViewById(R.id.fab);
         // initialize resultLinkMap
-        final Map<String, List<Map<String,Object>>> resultLinkMap = new HashMap<>();
+        final Map<String, List<DrudgeItem>> resultLinkMap = new HashMap<>();
 
         try {
             // Set GrabHTMLTask to run
@@ -45,7 +45,7 @@ public class MainActivity extends AppCompatActivity {
             // TODO make WeakReference
             GrabHTMLTask linksGrabber = new GrabHTMLTask(resultLinkMap, new GrabHTMLTask.AsyncResponse() {
                 @Override
-                public void processFinish(Map<String, List<Map<String,Object>>> resultMap) {
+                public void processFinish(Map<String, List<DrudgeItem>> resultMap) {
                     // Receives list/map of urls from GrabHTMLTask, pushes to PageViewModel for storage
                     pageViewModel.storeLinks(resultMap);
                 }
@@ -67,7 +67,7 @@ public class MainActivity extends AppCompatActivity {
                     // TODO make WeakReference
                     GrabHTMLTask linksGrabber = new GrabHTMLTask(resultLinkMap, new GrabHTMLTask.AsyncResponse() {
                         @Override
-                        public void processFinish(Map<String, List<Map<String,Object>>> resultMap) {
+                        public void processFinish(Map<String, List<DrudgeItem>> resultMap) {
                             // Receives list/map of urls from GrabHTMLTask, pushes to PageViewModel for storage
                             pageViewModel.storeLinks(resultMap);
                         }
