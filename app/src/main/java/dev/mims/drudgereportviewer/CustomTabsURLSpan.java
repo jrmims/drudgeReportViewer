@@ -1,5 +1,6 @@
 package dev.mims.drudgereportviewer;
 
+import android.text.TextPaint;
 import android.text.style.URLSpan;
 import android.view.View;
 
@@ -13,6 +14,11 @@ public class CustomTabsURLSpan extends URLSpan {
     public void setOnClickListener(CustomOnClickListener onClickListener)
     {
         this.onClickListener = onClickListener;
+    }
+
+    public void updateDrawState(TextPaint drawState) {
+        super.updateDrawState(drawState);
+        drawState.setUnderlineText(false);
     }
 
     @Override
