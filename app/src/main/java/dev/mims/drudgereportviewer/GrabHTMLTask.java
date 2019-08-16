@@ -131,14 +131,8 @@ public class GrabHTMLTask extends AsyncTask<URL, Integer, Map<String, List<Drudg
             } else if( tempLink.tagName().toLowerCase() == "img" ) {
                 // An Image
                 String imgURL = tempLink.attr("src");
-                try {
-                    Bitmap bitmap = BitmapFactory.decodeStream((InputStream) new URL(imgURL).getContent());
-                    Image imgObj = new Image(bitmap);
-                    tempLinkList.add(imgObj);
-                } catch (IOException e)
-                {
-
-                }
+                Image imgObj = new Image(imgURL);
+                tempLinkList.add(imgObj);
             } else if( tempLink.tagName().toLowerCase() == "hr" ) {
                 // a thematic break
                 DrudgeItem lastListObj = tempLinkList.get(tempLinkList.size()-1);

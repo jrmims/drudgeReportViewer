@@ -21,6 +21,8 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 
+import com.bumptech.glide.Glide;
+
 import java.util.List;
 import java.util.Map;
 
@@ -132,7 +134,13 @@ public class PlaceholderFragment extends Fragment {
                     } else if (item instanceof Image) {
                         Image tempImg = (Image)item;
                         ImageView tempIV = new ImageView(context);
-                        tempIV.setImageBitmap(tempImg.getImg());
+
+                        Glide
+                            .with(context)
+                            .load(tempImg.getUri())
+                            .fitCenter()
+//                            .placeholder(R.drawable.loading_spinner)
+                            .into(tempIV);
                         linearLayout.addView(tempIV);
 
                         // Add Line to separate links/images
