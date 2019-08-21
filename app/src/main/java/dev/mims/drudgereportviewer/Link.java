@@ -24,6 +24,11 @@ public class Link extends DrudgeItem {
     public void setSize(int size) {this.size = size;}
 
     public void setColor(String colorStr) {
-        colorInt = Color.parseColor(colorStr);
+        try {
+            colorInt = Color.parseColor(colorStr);
+        } catch (IllegalArgumentException e)
+        {
+            colorInt = Color.BLACK; // default
+        }
     }
 }
