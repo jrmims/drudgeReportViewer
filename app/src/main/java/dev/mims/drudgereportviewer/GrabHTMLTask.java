@@ -70,13 +70,30 @@ public class GrabHTMLTask extends AsyncTask<URL, Integer, Map<String, List<Drudg
             Document tempDoc = Jsoup.parse(tempStr);
             Elements tempLinks = tempDoc.select("a, img");
             // TODO: probably could make this smarter
-            // removes the Drudge Report Img from list, and the link for that image.
-            tempLinks.remove(tempLinks.size()-1);
-            tempLinks.remove(tempLinks.size()-1);
-            topLinkList = extractInfoFromLinks(tempLinks);
-            // Make Headline have larger text
-            DrudgeItem lastDrudgeItem = topLinkList.get(topLinkList.size()-1);
-            lastDrudgeItem.setSize(R.dimen.text_size_large);
+            if( tempLinks.size() >= 2 )
+            {
+                // removes the Drudge Report Img from list, and the link for that image.
+                tempLinks.remove(tempLinks.size()-1);
+                tempLinks.remove(tempLinks.size()-1);
+                extractInfoFromLinks(topLinkList, tempLinks);
+
+                if( topLinkList.isEmpty() )
+                {
+                    // notify user there are no current headlines
+                    Link noHeadlineLink = new Link("No Breaking News. Check the other tabs.", "");
+                    topLinkList.add(noHeadlineLink);
+                } else {
+                    // If we have a Top Headline, make text larger
+                    DrudgeItem lastDrudgeItem = topLinkList.get(topLinkList.size()-1);
+                    lastDrudgeItem.setSize(R.dimen.text_size_large);
+                }
+
+            } else {
+                // We have a parsing issue. Let users know there is an issue with the website or our app
+                Link errorLink = new Link("Parse Error. Check Your Internet Connection.", "");
+                topLinkList.add(errorLink);
+            }
+
 
             /*
             To grab left column links, we need to grab the first td table cell. Then we convert to
@@ -86,16 +103,26 @@ public class GrabHTMLTask extends AsyncTask<URL, Integer, Map<String, List<Drudg
             // in the first <td> section
             tempDoc = Jsoup.parse(htmlStr);
             Elements tableCells = tempDoc.select("td");
-            Element leftCol = tableCells.get(0);
-            leftLinkList = extractLinksFromTD(leftCol);
-            // middle column
-            Element middleCol = tableCells.get(2);
-            middleLinkList = extractLinksFromTD(middleCol);
-            // right column
-            Element rightCol = tableCells.get(4);
-            rightLinkList = extractLinksFromTD(rightCol);
-
-        } catch (IOException e)
+            if( tableCells.size() == 5 ) {
+                Element leftCol = tableCells.get(0);
+                extractLinksFromTD(leftLinkList, leftCol);
+                // middle column
+                Element middleCol = tableCells.get(2);
+                extractLinksFromTD(middleLinkList, middleCol);
+                // right column
+                Element rightCol = tableCells.get(4);
+                extractLinksFromTD(rightLinkList, rightCol);
+            }
+            else
+            {
+                // We have a parsing issue. Let users know there is an issue with the website or our app
+                Link errorLink = new Link("Parse Error. Check Your Internet Connection", "");
+                leftLinkList.add(errorLink);
+                middleLinkList.add(errorLink);
+                rightLinkList.add(errorLink);
+            }
+        }
+        catch( Exception e)
         {
             Log.e("GrabHTMLTask", e.toString());
         }
@@ -113,37 +140,39 @@ public class GrabHTMLTask extends AsyncTask<URL, Integer, Map<String, List<Drudg
         asyncResponseInterface.processFinish(resultMap);
     }
 
-    private List<DrudgeItem> extractInfoFromLinks(Elements links)
+    private void extractInfoFromLinks(List<DrudgeItem> linkList, Elements links)
     {
-        List<DrudgeItem> tempLinkList = new ArrayList<DrudgeItem>();
         for (Element tempLink : links)
         {
             if( tempLink.tagName().toLowerCase() == "a" ) {
                 // A Link
                 Link linkObj = new Link(tempLink.text(), tempLink.attr("href"));
                 String tempColor = extractFontColor(tempLink);
-                if(tempColor == "")
+                if(tempColor != "")
                 {
-                    tempColor = "black"; // default
+                    // Drudge provided a color. let's use it
+                    linkObj.setColor(tempColor);
                 }
-                linkObj.setColor(tempColor);
-                tempLinkList.add(linkObj);
+                linkList.add(linkObj);
             } else if( tempLink.tagName().toLowerCase() == "img" ) {
                 // An Image
                 String imgURL = tempLink.attr("src");
                 Image imgObj = new Image(imgURL);
-                tempLinkList.add(imgObj);
+                linkList.add(imgObj);
             } else if( tempLink.tagName().toLowerCase() == "hr" ) {
                 // a thematic break
-                DrudgeItem lastListObj = tempLinkList.get(tempLinkList.size()-1);
-                lastListObj.setHR();
+                if( linkList.size() > 0 ) {
+                    DrudgeItem lastListObj = linkList.get(linkList.size() - 1);
+                    lastListObj.setHR();
+                }
             }
         }
-        return tempLinkList;
+        return;
     }
 
     String extractFontColor(Element link)
     {
+        // TODO Check if color is valid Android color
         String color = "";
         Elements fontElList = link.getElementsByTag("font");
         if(fontElList.size() > 0)
@@ -155,17 +184,20 @@ public class GrabHTMLTask extends AsyncTask<URL, Integer, Map<String, List<Drudg
         return color;
     }
 
-    private List<DrudgeItem> extractLinksFromTD(Element tableCell)
+    private void extractLinksFromTD(List<DrudgeItem> linkList, Element tableCell)
     {
         // in the first <td> section
         String tempStr = tableCell.toString();
         // filter out source links
         int stopPos = tempStr.indexOf("<!"); // source links start after this comment section
-        tempStr = tempStr.substring(0,stopPos);
-        // all links found in tempStr should now be real news links
-        Document tempDoc = Jsoup.parseBodyFragment(tempStr);
-        Elements columnLinks = tempDoc.select("a, img, hr");
-        List<DrudgeItem> linkList = extractInfoFromLinks(columnLinks);
-        return linkList;
+        if (stopPos != -1 )
+        {
+            tempStr = tempStr.substring(0,stopPos);
+            // all links found in tempStr should now be real news links
+            Document tempDoc = Jsoup.parseBodyFragment(tempStr);
+            Elements columnLinks = tempDoc.select("a, img, hr");
+            extractInfoFromLinks(linkList, columnLinks);
+        }
+        return;
     }
 }

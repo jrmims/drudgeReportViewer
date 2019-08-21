@@ -29,11 +29,15 @@ public class CustomTabsURLSpan extends URLSpan {
         also check if a web browser is installed
         more suggestions: https://medium.com/google-developers/best-practices-for-custom-tabs-5700e55143ee
         */
-        try {
-            onClickListener.setURL(getURL());
-            onClickListener.onClick(view);
-        } catch (Exception e) {
-            super.onClick(view);
+        String urlStr = getURL();
+        if( urlStr != "" ) {
+            // we have a url
+            try {
+                onClickListener.setURL(urlStr);
+                onClickListener.onClick(view);
+            } catch (Exception e) {
+                super.onClick(view);
+            }
         }
     }
 

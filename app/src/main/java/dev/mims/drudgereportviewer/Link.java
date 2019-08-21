@@ -12,6 +12,7 @@ public class Link extends DrudgeItem {
         this.title = title;
         this.url = url;
         size = R.dimen.text_size_medium;
+        colorInt = Color.BLACK;
     }
 
     public String getTitle() {return title;}
